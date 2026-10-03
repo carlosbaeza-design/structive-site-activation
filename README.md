@@ -2,15 +2,21 @@
 
 Owner assurance and readiness workspace for data center activation. Commissioning is executed by the delivery team; Threshold supports its QA/QC, evidence review and owner acceptance.
 
-## Branding iteration
-
-Threshold is the current working product name, endorsed as Powered by Structive. The shared title banner uses an animated ice-blue-to-amber wordmark, illuminated geometric frames, and a horizon graphic. Motion can be paused and automatically respects reduced-motion preferences. The banner appears in the workspace and sign-in view.
-
 ## Status
 
 The dedicated free backend is installed and connected. The release is prepared for https://carlosbaeza-design.github.io/structive-site-activation/ with a connected preview at /engine/. Authenticated browser verification has exercised campus/site setup, the 832-task register, equipment and schedule imports, private script retrieval, evidence review, task completion, owner decision snapshots, evidence rejection and degraded readiness. Verification records are clearly labeled TEST ONLY and do not certify operational readiness.
 
 The public client contains no demonstration site records or task-library seed. It reads authorized workspace data from the dedicated backend. Private methodology, database rules and source task templates are maintained separately.
+
+## Branding iteration
+
+The shared Threshold title banner retains its animated wordmark, illuminated geometric frames and horizon graphic. Motion can be paused and respects reduced-motion preferences. The activation timeline remains ahead of the metrics.
+
+## Identity and interface refinement
+
+Threshold is the current product name, powered by Structive. The public route and backend project retain their original repository identifiers. The interface uses a navy foundation, warm neutral timeline surface, orange accents, a custom vector mark and self-hosted Space Grotesk typography. Setup, scoring, evidence, QA and acceptance behavior is unchanged.
+
+Space Grotesk is by Florian Karsten and its contributors, distributed under the SIL Open Font License. Source: https://github.com/floriankarsten/space-grotesk . The bundled font license is in `assets/fonts/OFL-SpaceGrotesk.txt`.
 
 ## Version 0.3 — setup-driven executive view
 

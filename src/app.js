@@ -1,4 +1,5 @@
-import {productBrand,productBanner} from './branding.js';
+import {productBanner} from './branding.js';
+import {productName,brandMark,navIcon} from './identity.js';
 import {createOverview} from './overview.js';
 import {createClient} from '@supabase/supabase-js';
 import {fields,labels,parseFile,mapRows,toCSV} from './records.js';
@@ -49,7 +50,7 @@ async function loadSite(){
  data.assuranceSummary=await rpc('site_assurance_summary',{site_id:site.id});loadedAt=new Date().toLocaleTimeString();sessionStorage.setItem('structive-site',site.id);
 }
 function shell(){
- $('#app').innerHTML=`<div class="app"><aside>${productBrand()}<nav aria-label="Main navigation">${nav.map(([id,label,group])=>`${group?`<div class="group">${group}</div>`:''}<button type="button" data-route="${id}" ${route===id?'aria-current="page"':''}>${label}</button>`).join('')}</nav><div class="aside-note">Readiness follows verified work.<br>Acceptance remains a named owner decision.</div></aside><main>${productBanner()}<header><label>Campus / site<select id="site-select" aria-label="Select site">${opt('',sites.length?'Set up or select a site':'No site configured',site?.id||'')}${sites.map(s=>opt(s.id,`${campuses.find(c=>c.id===s.campus_id)?.name||''} / ${s.code} · ${s.name}`,site?.id)).join('')}</select></label><div class="row"><small>${esc(role()||'No workspace access')}<br>${esc(session?.user.email||'')}</small>${button('Refresh','refresh')}${button('Sign out','signout')}</div></header><section class="content" id="content" tabindex="-1"></section></main></div>`;
+ $('#app').innerHTML=`<div class="app"><aside><div class="brand"><span class="brand-icon">${brandMark}</span><div><b>${productName}</b><small>POWERED BY STRUCTIVE</small></div></div><nav aria-label="Main navigation">${nav.map(([id,label,group])=>`${group?`<div class="group">${group}</div>`:''}<button type="button" data-route="${id}" ${route===id?'aria-current="page"':''}>${navIcon(id)}<span>${label}</span></button>`).join('')}</nav><div class="aside-note"><span class="rail-signature">STRUCTIVE</span><span>OWNER ASSURANCE<br>SITE ACTIVATION / OPERATIONS</span></div></aside><main>${productBanner()}<header><label>Campus / site<select id="site-select" aria-label="Select site">${opt('',sites.length?'Set up or select a site':'No site configured',site?.id||'')}${sites.map(s=>opt(s.id,`${campuses.find(c=>c.id===s.campus_id)?.name||''} / ${s.code} · ${s.name}`,site?.id)).join('')}</select></label><div class="row"><small>${esc(role()||'No workspace access')}<br>${esc(session?.user.email||'')}</small>${button('Refresh','refresh')}${button('Sign out','signout')}</div></header><section class="content" id="content" tabindex="-1"></section></main></div>`;
  render();
 }
 function navigate(value){const next=nav.some(n=>n[0]===value)?value:'setup';if(location.hash==='#'+next){route=next;render();}else location.hash=next;}
