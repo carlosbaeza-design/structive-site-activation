@@ -7,7 +7,7 @@ export function createHelp({state,esc}) {
  const $=s=>document.querySelector(s);
  function article(actions=true) {
   const t=resolveGuide(context);
-  return `<p class="guide-purpose">${esc(t.purpose)}</p><h3>How to use this screen</h3><ol>${t.steps.map(s=>`<li>${esc(s)}</li>`).join('')}</ol><div class="guide-result"><h3>What the result means</h3><p>${esc(t.result)}</p></div>${actions&&t.next?`<button type="button" class="secondary guide-next" data-route="${esc(t.next[0])}">Open ${esc(t.next[1])} →</button>`:''}`;
+  return `<p class="guide-purpose">${esc(t.purpose)}</p><h3>How to use this screen</h3><ol>${t.steps.map(s=>`<li>${esc(s)}</li>`).join('')}</ol><div class="guide-result"><h3>What the result means</h3><p>${esc(t.result)}</p></div>${actions&&t.next&&(!state().allowedRoutes||state().allowedRoutes.includes(t.next[0]))?`<button type="button" class="secondary guide-next" data-route="${esc(t.next[0])}">Open ${esc(t.next[1])} →</button>`:''}`;
  }
  function refresh(){
   if(!$('#reference-panel'))return;

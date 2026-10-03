@@ -18,15 +18,26 @@ The shared Threshold title banner retains its animated wordmark, illuminated geo
 
 ## Identity and interface refinement
 
-Threshold is the current product name, powered by Structive. The public route and backend project retain their original repository identifiers. The interface uses a navy foundation, warm neutral timeline surface, orange accents, a custom vector mark and self-hosted Space Grotesk typography. Setup, scoring, evidence, QA and acceptance behavior is unchanged.
+Threshold is the current product name, powered by Structive. The public route and backend project retain their original repository identifiers. The interface uses a navy foundation, warm neutral timeline surface, orange accents, a custom vector mark and self-hosted Montserrat for the wordmark and headings, with Space Grotesk for body text and controls.
 
 Space Grotesk is by Florian Karsten and its contributors, distributed under the SIL Open Font License. Source: https://github.com/floriankarsten/space-grotesk . The bundled font license is in `assets/fonts/OFL-SpaceGrotesk.txt`.
+
+## Scope ownership and individual workspaces
+
+- Thirteen canonical scope codes: GOV, OPS, MNT, REL, CTL, TRN, EHS, SEC, LOG, VEN, BCM, DOC and ITOT.
+- Each site has an accountable scope owner / sponsor and an eligible task team for each code. The owner can delegate within that team or assign work to themselves.
+- Authorized email identities link to individual verified sign-ins. New users receive scoped membership; existing program administrators and verification roles retain their authorities.
+- Scope owners see their scope's tasks, deadlines, blockers, evidence and assignments. Executors see their assigned tasks and can update execution status, notes, blockers and evidence. Row-level policies and checked database functions enforce these boundaries.
+- SOC 2 Type 1 / Type 2 targets, selected Trust Services Criteria categories, system boundary and observation dates can be configured. Tasks can carry agreed criterion references. This supports preparation and does not constitute an attestation or an automatic control library.
+- The contextual guide includes Scopes & People, personal workspaces and SOC 2 assurance.
+
+Deployment prerequisite: production email-link onboarding requires a configured email provider. At the October 3, 2026 release, this project has neither custom SMTP nor a Send Email hook. Authorizing a person does not send an invitation. Configure delivery before onboarding new users, then have each authorized person request their own sign-in link.
 
 ## Version 0.3 — setup-driven executive view
 
 - Navy dark interface with a five-step site setup banner and live unsaved previews.
 - Delivery models for in-house / agency commissioning, owner / third-party operations, operations establishment and construction delivery.
-- Optional vertical-level owner defaults apply only to unfinished, unassigned tasks; individual ownership remains editable.
+- Scope ownership and task assignments are managed through Scopes & People and the task register. Legacy free-text owner labels remain visible until linked to an authorized person.
 - Clickable L1–L5, Ops MVP, handoff, stabilization and steady-state timeline, plus G0/G1/G3, filters tasks and source activities.
 - Saved document-review and field-observation targets, evidence verification levels, findings thresholds, qualifiers and explicitly confirmed source-event populations.
 - Append-only owner assurance reviews; repeated reviews count one event, with current verified evidence required for positive coverage.
@@ -71,6 +82,6 @@ Validate row-level access, private file uploads/downloads, email sign-in, site c
 
 ## Current scope
 
-This is an owner assurance and readiness foundation. Enterprise inheritance, automated assurance sampling, controlled conditional exceptions, native P6/MPP parsing, forecasting, external CMMS integration and an administration UI for team invitations are not implemented. CSV and first-sheet XLSX structured imports are supported; other source formats are retained as files. Source schedule predecessor IDs do not automatically become execution dependencies.
+This is an owner assurance and readiness foundation. Enterprise inheritance, automated assurance sampling, controlled conditional exceptions, native P6/MPP parsing, forecasting, external CMMS integration and automatic invitation emails are not implemented. CSV and first-sheet XLSX structured imports are supported; other source formats are retained as files. Source schedule predecessor IDs do not automatically become execution dependencies.
 
 Frontend import validation has automated tests. The private backend has separate PostgreSQL tests for access isolation, site/task instantiation, verification, atomic imports, dependency cycles, degraded acceptance and immutable history. Hosted anonymous REST requests are rejected, every public table has RLS, private file storage is configured, and no new database security warnings were introduced. The hosted Auth advisor reports compromised-password protection disabled; this client uses email-link sign-in. Authenticated browser testing confirmed private file retrieval byte-for-byte, server rejection of completion without evidence, acceptance after configured controls, degraded readiness after evidence rejection, retained review/decision history, and saved records after reload. The 10 navigation destinations were exercised. First entry asks the user to choose or configure a site; no test site is automatically selected.
