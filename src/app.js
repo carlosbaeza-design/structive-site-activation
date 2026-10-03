@@ -30,7 +30,7 @@ async function unwrap(p){const r=await p;if(r.error)throw Error(r.error.message)
 async function rpc(name,args={}){return unwrap(db.rpc(name,args));}
 async function all(tableName,column,value,order='id'){
  let list=[];
- for(let from=0;;from+=1000){let query=db.from(tableName).select('*').order(order).range(from,from+999);if(column)query=query.eq(column,value);const batch=await unwrap(query);list.push(...batch);if(batch.length<1000)return list;}
+ for(let from=0;;from+=1000){let query=db.from(tableName).select('*').order(order).range(from,from+999);if(tableName==='requirement_milestones')query=query.order('milestone_id');if(tableName==='task_dependencies')query=query.order('predecessor_id');if(column)query=query.eq(column,value);const batch=await unwrap(query);list.push(...batch);if(batch.length<1000)return list;}
 }
 async function loadWorkspace(){
  await rpc('bootstrap_membership');
