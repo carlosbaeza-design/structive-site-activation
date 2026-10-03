@@ -4,7 +4,7 @@ Candidate application for site configuration, equipment and schedule imports, co
 
 ## Status
 
-This branch is prepared for backend integration. It is not the deployed engine. The dedicated Supabase project must be provisioned and configured before this branch replaces the GitHub Pages prototype.
+The dedicated free backend is installed and connected. A verification preview is published at https://carlosbaeza-design.github.io/structive-site-activation/engine/. This draft branch is not yet the root deployment. The first application account sign-in and authenticated browser workflow checks remain release gates; the root page still serves the original static prototype.
 
 The public client contains no demonstration site records or task-library seed. It reads authorized workspace data from the dedicated backend. Private methodology, database rules and source task templates are maintained separately.
 
@@ -32,11 +32,11 @@ npm run build
 
 The build writes deployable static assets to `dist/`. Copy the generated assets to the repository root for GitHub Pages only after backend integration and browser verification.
 
-`config.json` accepts a dedicated Supabase project URL and its publishable key. Never put database passwords, service-role keys, secret keys, task-library seeds, private migrations or customer evidence in this public repository. An empty configuration displays an explicit connection-pending message.
+`config.json` accepts a dedicated Supabase project URL and its publishable key. Never put database passwords, service-role keys, secret keys, task-library seeds, private migrations or customer evidence in this public repository. The current configuration contains only the dedicated project URL and its publishable key. An empty configuration displays an explicit connection-pending message.
 
 ## Integration requirements
 
-Provision a separate free project for Structive Site Activation; do not use the existing NOOLY project. Apply the private schema, configuration functions, workflow functions and task-library seed to that project. Enable confirmed email sign-in and configure the published GitHub Pages URL as the permitted sign-in redirect. Workspace membership is server assigned.
+The separate free Structive Site Activation project has its private schema, configuration/workflow functions, task-library seed and hosted hardening migration installed. Confirmed email is enabled; anonymous sign-in is disabled. Exact root and /engine/ redirects are configured. Workspace membership is server assigned. The existing NOOLY project remains untouched.
 
 Validate row-level access, private file uploads/downloads, email sign-in, site creation, structured imports and an evidence-to-acceptance workflow against the hosted project before publishing.
 
@@ -44,4 +44,4 @@ Validate row-level access, private file uploads/downloads, email sign-in, site c
 
 This is an execution and readiness foundation. Enterprise inheritance, automated assurance sampling, controlled conditional exceptions, native P6/MPP parsing, forecasting, external CMMS integration and an administration UI for team invitations are not implemented. CSV and first-sheet XLSX structured imports are supported; other source formats are retained as files. Source schedule predecessor IDs do not automatically become execution dependencies.
 
-Frontend import validation has automated tests. The private backend has separate PostgreSQL tests for access isolation, site/task instantiation, verification, atomic imports, dependency cycles, degraded acceptance and immutable history. Hosted integration and browser testing are pending.
+Frontend import validation has automated tests. The private backend has separate PostgreSQL tests for access isolation, site/task instantiation, verification, atomic imports, dependency cycles, degraded acceptance and immutable history. Hosted anonymous REST requests are rejected, every public table has RLS, private file storage is configured, and the security advisor has no WARN/ERROR findings. The preview sign-in page loads successfully. Authenticated browser testing is pending.
