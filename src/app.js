@@ -1,3 +1,4 @@
+import {createHelp} from './help.js';
 import {productBanner} from './branding.js';
 import {productName,brandMark,navIcon} from './identity.js';
 import {createOverview} from './overview.js';
@@ -51,10 +52,11 @@ async function loadSite(){
 }
 function shell(){
  $('#app').innerHTML=`<div class="app"><aside><div class="brand"><span class="brand-icon">${brandMark}</span><div><b>${productName}</b><small>POWERED BY STRUCTIVE</small></div></div><nav aria-label="Main navigation">${nav.map(([id,label,group])=>`${group?`<div class="group">${group}</div>`:''}<button type="button" data-route="${id}" ${route===id?'aria-current="page"':''}>${navIcon(id)}<span>${label}</span></button>`).join('')}</nav><div class="aside-note"><span class="rail-signature">STRUCTIVE</span><span>OWNER ASSURANCE<br>SITE ACTIVATION / OPERATIONS</span></div></aside><main>${productBanner()}<header><label>Campus / site<select id="site-select" aria-label="Select site">${opt('',sites.length?'Set up or select a site':'No site configured',site?.id||'')}${sites.map(s=>opt(s.id,`${campuses.find(c=>c.id===s.campus_id)?.name||''} / ${s.code} · ${s.name}`,site?.id)).join('')}</select></label><div class="row"><small>${esc(role()||'No workspace access')}<br>${esc(session?.user.email||'')}</small>${button('Refresh','refresh')}${button('Sign out','signout')}</div></header><section class="content" id="content" tabindex="-1"></section></main></div>`;
- render();
+ guide.mount();render();
 }
 function navigate(value){const next=nav.some(n=>n[0]===value)?value:'setup';if(location.hash==='#'+next){route=next;render();}else location.hash=next;}
 async function render(){
+ guide.hideTip();guide.setContext(route);
  const generation=++renderId;
  if(!workspaces.length){$('#content').innerHTML=heading('Workspace access required','You are signed in, but this account has not been assigned to a Structive workspace.')+`<div class="card"><p>Use the email address authorized for this workspace. Signing in does not automatically grant access to site records.</p>${button('Sign out','signout')}</div>`;return;}
  if(!site&&route!=='setup'){$('#content').innerHTML=heading('Set up your first site','Create the campus and site basis to start the execution register.')+button('Set up a site','new-site','','');return;}
@@ -85,7 +87,7 @@ function readinessView(){return heading('Readiness & Decisions','Eligibility is 
 function gateCard(g){const m=data.milestones.find(m=>m.id===g.milestone_id);return `<article class="card milestone"><div class="eyebrow">${esc(m.track)}</div><h2>${esc(m.code)} · ${esc(m.name)}</h2><div class="value">${badge(g.state)}</div><p>${g.verified} / ${g.total} requirements satisfied<br><small class="muted">${g.critical_open} open Critical No-Go requirements · Planned ${esc(m.planned_date||'not set')}</small></p>${g.reasons.length?`<ul>${g.reasons.map(r=>`<li>${esc(r)}</li>`).join('')}</ul>`:'<p class="muted">The configured readiness conditions are satisfied.</p>'}<div class="row">${button('View tasks','milestone-tasks',m.id)}${manage()&&g.eligible_for_acceptance?button('Record acceptance','accept',m.id,''):''}${manage()&&['Accepted','Degraded'].includes(g.state)?button('Withdraw acceptance','withdraw',m.id):''}</div></article>`;}
 function historyView(){return heading('Change History','Server-recorded changes and acceptance snapshots. The latest 150 changes are shown below.')+`<div class="card"><h2>Acceptance decisions</h2>${table(['When','Milestone','Decision','Authority',''],data.gate_decisions.slice().sort((a,b)=>Number(b.decision_seq)-Number(a.decision_seq)).map(d=>`<tr><td>${esc(date(d.created_at))}</td><td>${esc(data.milestones.find(m=>m.id===d.milestone_id)?.code)}</td><td>${badge(d.decision)}</td><td>${esc(d.authority)}</td><td>${button('View snapshot','decision',d.id,'link')}</td></tr>`))}</div><div id="audit" class="loading">Loading change history…</div>`;}
 
-function modal(title,body){const d=$('#dialog');d.innerHTML=`<div class="dialog-head"><h2 id="dialog-title">${esc(title)}</h2>${button('Close','close')}</div><div class="dialog-body"><div id="form-error" role="alert"></div>${body}</div>`;if(!d.open)d.showModal();}
+function modal(title,body){const d=$('#dialog');d.innerHTML=`<div class="dialog-head"><h2 id="dialog-title">${esc(title)}</h2>${button('Close','close')}</div><div class="dialog-body">${guide.inline()}<div id="form-error" role="alert"></div>${body}</div>`;if(!d.open)d.showModal();}
 function close(){if(busy)return;$('#dialog').close();$('#dialog').innerHTML='';}
 function form(id,body,label='Save changes'){return `<form id="${id}">${body}<div class="form-actions">${button('Cancel','close')}<button type="submit">${esc(label)}</button></div></form>`;}
 function read(formEl){return Object.fromEntries(new FormData(formEl));}
@@ -133,6 +135,7 @@ function importModal(kind){
 }
 
 async function action(name,id){
+ const helpContext={'new-site':'setup-1','edit-site':'setup-1','task':'tasks','new-task':'tasks','requirement':'tasks','asset':'equipment','new-asset':'equipment','milestone':'milestones','capability':'capabilities','add-evidence':'evidence','open-evidence':'evidence','review':'reviews','accept':'readiness','withdraw':'readiness','decision':'history','audit':'history','import':id==='assets'?'equipment':'schedule'};if(helpContext[name])guide.setContext(helpContext[name]);
  const actions={
   close,refresh:async()=>{await loadWorkspace();shell();notice('Saved records refreshed.');},signout:async()=>{await unwrap(db.auth.signOut());site=null;data={};session=null;sessionStorage.removeItem('structive-site');authView();},
   'new-site':newSite,'edit-site':editSite,'new-asset':()=>assetModal(),'asset':()=>assetModal(id),'milestone':()=>milestoneModal(id),'task':()=>taskModal(id),'requirement':()=>requirementModal(id),'new-task':newTask,'capability':()=>capabilityModal(id),'add-evidence':()=>addEvidence(id),'open-evidence':()=>openEvidence(id),'review':()=>reviewEvidence(id),'accept':()=>acceptModal(id),'withdraw':()=>acceptModal(id,true),'import':()=>importModal(id),'template':()=>download('structive-'+id+'-template.csv',fields[id].join(',')+'\r\n','text/csv'),
@@ -151,6 +154,7 @@ document.addEventListener('change',async e=>{if(e.target.id==='site-select'){e.t
 $('#dialog').addEventListener('cancel',e=>{if(busy)e.preventDefault();});
 window.addEventListener('hashchange',()=>{if(session&&nav.some(n=>n[0]===location.hash.slice(1))){route=location.hash.slice(1);document.querySelectorAll('[data-route]').forEach(b=>{if(b.dataset.route===route)b.setAttribute('aria-current','page');else b.removeAttribute('aria-current');});render();}});
 function authView(message=''){
+ guide.hide();
  $('#app').innerHTML=`<main class="auth">${productBanner()}<div class="card"><h1>Open your workspace</h1><p class="sub">From commissioning assurance to steady operations. One connected readiness workspace.</p>${message?`<div class="callout">${esc(message)}</div>`:''}<form id="signin">${input('email','Authorized workspace email','','email','required autocomplete="email"')}<button type="submit">Email a sign-in link</button></form><p class="help">Only authorized workspace members can access site data. Check your email to finish signing in.</p></div></main>`;
  $('#signin').onsubmit=async e=>{e.preventDefault();const b=e.target.querySelector('button');b.disabled=true;try{await unwrap(db.auth.signInWithOtp({email:read(e.target).email,options:{shouldCreateUser:true,emailRedirectTo:location.origin+location.pathname}}));authView('A sign-in link was requested. Check your inbox and open the link on this device.');}catch(err){notice(err.message,true);b.disabled=false;}};
 }
@@ -165,5 +169,6 @@ async function start(){
   if(!session){authView();return;}route=nav.some(n=>n[0]===location.hash.slice(1))?location.hash.slice(1):'setup';await loadWorkspace();shell();
  }catch(err){$('#app').innerHTML=`<main class="auth"><h1>Workspace unavailable</h1><div class="callout error">${esc(err.message)}</div><p>Reload to retry. Existing site records are retained on the server.</p></main>`;}
 }
-const dashboard=createOverview({state:()=>({site,data,campuses,manage:manage(),verify:verify()}),ui:{esc,input,area,select,check,opt,options,button,table,badge,heading,modal,form,save,read,levels},rpc,reload:async()=>{await loadWorkspace();shell();},navigate,notice});
+const guide=createHelp({state:()=>({site,data}),esc});
+const dashboard=createOverview({state:()=>({site,data,campuses,manage:manage(),verify:verify()}),ui:{esc,input,area,select,check,opt,options,button,table,badge,heading,modal,form,save,read,levels},onContext:key=>guide.setContext(key),hideTip:()=>guide.hideTip(),rpc,reload:async()=>{await loadWorkspace();shell();},navigate,notice});
 start();

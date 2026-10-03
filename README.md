@@ -2,6 +2,10 @@
 
 Owner assurance and readiness workspace for data center activation. Commissioning is executed by the delivery team; Threshold supports its QA/QC, evidence review and owner acceptance.
 
+## Contextual reference
+
+The right-side User guide tab follows the active screen, setup step and selected milestone. Edit windows also contain an expandable guide. Timeline tiles expose definitions before configuration and saved-record snapshots afterward. Hover, keyboard focus and information buttons provide access; Escape dismisses a tip or closes the guide. Snapshots keep task progress separate from server-evaluated acceptance and use saved dates and QA records, even while setup has unsaved edits.
+
 ## Status
 
 The dedicated free backend is installed and connected. The release is prepared for https://carlosbaeza-design.github.io/structive-site-activation/ with a connected preview at /engine/. Authenticated browser verification has exercised campus/site setup, the 832-task register, equipment and schedule imports, private script retrieval, evidence review, task completion, owner decision snapshots, evidence rejection and degraded readiness. Verification records are clearly labeled TEST ONLY and do not certify operational readiness.
