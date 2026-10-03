@@ -1,10 +1,10 @@
 # Structive Site Activation
 
-Candidate application for site configuration, equipment and schedule imports, coded task execution, evidence verification, and owner readiness decisions.
+Application for site configuration, equipment and schedule imports, coded task execution, evidence verification, and owner readiness decisions.
 
 ## Status
 
-The dedicated free backend is installed and connected. A verification preview is published at https://carlosbaeza-design.github.io/structive-site-activation/engine/. This draft branch is not yet the root deployment. The first application account sign-in and authenticated browser workflow checks remain release gates; the root page still serves the original static prototype.
+The dedicated free backend is installed and connected. The release is prepared for https://carlosbaeza-design.github.io/structive-site-activation/ with a connected preview at /engine/. Authenticated browser verification has exercised campus/site setup, the 832-task register, equipment and schedule imports, private script retrieval, evidence review, task completion, owner decision snapshots, evidence rejection and degraded readiness. Verification records are clearly labeled TEST ONLY and do not certify operational readiness.
 
 The public client contains no demonstration site records or task-library seed. It reads authorized workspace data from the dedicated backend. Private methodology, database rules and source task templates are maintained separately.
 
@@ -44,4 +44,4 @@ Validate row-level access, private file uploads/downloads, email sign-in, site c
 
 This is an execution and readiness foundation. Enterprise inheritance, automated assurance sampling, controlled conditional exceptions, native P6/MPP parsing, forecasting, external CMMS integration and an administration UI for team invitations are not implemented. CSV and first-sheet XLSX structured imports are supported; other source formats are retained as files. Source schedule predecessor IDs do not automatically become execution dependencies.
 
-Frontend import validation has automated tests. The private backend has separate PostgreSQL tests for access isolation, site/task instantiation, verification, atomic imports, dependency cycles, degraded acceptance and immutable history. Hosted anonymous REST requests are rejected, every public table has RLS, private file storage is configured, and the security advisor has no WARN/ERROR findings. The preview sign-in page loads successfully. Authenticated browser testing is pending.
+Frontend import validation has automated tests. The private backend has separate PostgreSQL tests for access isolation, site/task instantiation, verification, atomic imports, dependency cycles, degraded acceptance and immutable history. Hosted anonymous REST requests are rejected, every public table has RLS, private file storage is configured, and the security advisor has no WARN/ERROR findings. Authenticated browser testing confirmed private file retrieval byte-for-byte, server rejection of completion without evidence, acceptance after configured controls, degraded readiness after evidence rejection, retained review/decision history, and saved records after reload. The 10 navigation destinations were exercised. First entry asks the user to choose or configure a site; no test site is automatically selected.
