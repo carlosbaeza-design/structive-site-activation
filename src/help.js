@@ -22,9 +22,10 @@ export function createHelp({state,esc}) {
  }
  function applyOpen(){if(!$('#reference-panel'))return;$('#reference-panel').hidden=!opened;$('#guide-launcher').setAttribute('aria-expanded',String(opened));$('#guide-launcher').hidden=opened;}
  function toggle(open){
+  if(open)returnFocus=document.activeElement;
   opened=open;hideTip();applyOpen();
   try {localStorage.setItem('structive-guide-open',String(opened));} catch {}
-  if(open){returnFocus=document.activeElement;$('#reference-title')?.focus();}
+  if(open){$('#reference-title')?.focus();}
   else (returnFocus?.isConnected?returnFocus:$('#guide-launcher'))?.focus();
  }
  function hide(){hideTip();if($('#reference-root'))$('#reference-root').hidden=true;}
@@ -32,10 +33,14 @@ export function createHelp({state,esc}) {
  function hideTip(){clearTimeout(hideTimer);if(trigger){trigger.removeAttribute('aria-describedby');if(trigger.hasAttribute('data-gate-peek'))trigger.setAttribute('aria-expanded','false');}if($('#milestone-tip'))$('#milestone-tip').hidden=true;trigger=null;tipCode='';pinned=false;}
  function positionTip(){
   const tip=$('#milestone-tip');if(!trigger?.isConnected||!tip||tip.hidden){hideTip();return;}
-  const r=trigger.getBoundingClientRect(),w=tip.offsetWidth,h=tip.offsetHeight,vw=document.documentElement.clientWidth,vh=window.innerHeight;
+  const r=trigger.getBoundingClientRect(),vw=document.documentElement.clientWidth,vh=window.innerHeight;
+  tip.style.maxHeight=`${Math.min(520,vh-24)}px`;
+  const w=tip.offsetWidth,h=tip.offsetHeight,above=Math.max(0,r.top-22),below=Math.max(0,vh-r.bottom-22);
   const left=Math.max(12,Math.min(r.left+r.width/2-w/2,vw-w-12));
-  let top=r.bottom+10;if(top+h>vh-12)top=r.top-h-10;
-  tip.style.left=`${left}px`;tip.style.top=`${Math.max(12,Math.min(top,vh-h-12))}px`;
+  const placeBelow=h<=below||(h>above&&below>=above);
+  tip.style.maxHeight=`${Math.min(520,placeBelow?below:above)}px`;
+  const top=placeBelow?r.bottom+10:r.top-tip.offsetHeight-10;
+  tip.style.left=`${left}px`;tip.style.top=`${Math.max(12,top)}px`;
  }
  function showTip(element,pin=false){
   const code=element.dataset.gateTip;const {site,data}=state();const s=milestoneSnapshot(code,site,data);
