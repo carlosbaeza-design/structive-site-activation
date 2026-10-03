@@ -1,12 +1,27 @@
-# Structive Site Activation
+# SteadyGate · Powered by Structive
 
-Application for site configuration, equipment and schedule imports, coded task execution, evidence verification, and owner readiness decisions.
+Owner assurance and readiness workspace for data center activation. Commissioning is executed by the delivery team; SteadyGate supports its QA/QC, evidence review and owner acceptance.
 
 ## Status
 
 The dedicated free backend is installed and connected. The release is prepared for https://carlosbaeza-design.github.io/structive-site-activation/ with a connected preview at /engine/. Authenticated browser verification has exercised campus/site setup, the 832-task register, equipment and schedule imports, private script retrieval, evidence review, task completion, owner decision snapshots, evidence rejection and degraded readiness. Verification records are clearly labeled TEST ONLY and do not certify operational readiness.
 
 The public client contains no demonstration site records or task-library seed. It reads authorized workspace data from the dedicated backend. Private methodology, database rules and source task templates are maintained separately.
+
+## Version 0.3 — setup-driven executive view
+
+- Navy dark interface with a five-step site setup banner and live unsaved previews.
+- Delivery models for in-house / agency commissioning, owner / third-party operations, operations establishment and construction delivery.
+- Optional vertical-level owner defaults apply only to unfinished, unassigned tasks; individual ownership remains editable.
+- Clickable L1–L5, Ops MVP, handoff, stabilization and steady-state timeline, plus G0/G1/G3, filters tasks and source activities.
+- Saved document-review and field-observation targets, evidence verification levels, findings thresholds, qualifiers and explicitly confirmed source-event populations.
+- Append-only owner assurance reviews; repeated reviews count one event, with current verified evidence required for positive coverage.
+- Required samples round up. Empty/unconfirmed applicable populations never pass. Changes to selected source activities reset confirmation.
+- Priority, vertical and milestone reporting weights are editable. They never override gate acceptance rules or alter the accepted evidence basis when only weights change.
+
+QA is enforced for its corresponding L3/L4/L5 gate and for G3–G6. G2 Ops MVP continues to use its configured requirements, rather than universally requiring L5 completion. Setup review does not accept a gate or substitute for the separate site basis review.
+
+Weighted completion = completed Required task weight / all applicable task weight. Each task counts once; task weight is priority × vertical × average mapped-milestone weight. Not Applicable work is excluded; unresolved applicability cannot earn completion credit. Displayed work completion is not evidence-based readiness.
 
 ## Workflows
 
@@ -42,6 +57,6 @@ Validate row-level access, private file uploads/downloads, email sign-in, site c
 
 ## Current scope
 
-This is an execution and readiness foundation. Enterprise inheritance, automated assurance sampling, controlled conditional exceptions, native P6/MPP parsing, forecasting, external CMMS integration and an administration UI for team invitations are not implemented. CSV and first-sheet XLSX structured imports are supported; other source formats are retained as files. Source schedule predecessor IDs do not automatically become execution dependencies.
+This is an owner assurance and readiness foundation. Enterprise inheritance, automated assurance sampling, controlled conditional exceptions, native P6/MPP parsing, forecasting, external CMMS integration and an administration UI for team invitations are not implemented. CSV and first-sheet XLSX structured imports are supported; other source formats are retained as files. Source schedule predecessor IDs do not automatically become execution dependencies.
 
-Frontend import validation has automated tests. The private backend has separate PostgreSQL tests for access isolation, site/task instantiation, verification, atomic imports, dependency cycles, degraded acceptance and immutable history. Hosted anonymous REST requests are rejected, every public table has RLS, private file storage is configured, and the security advisor has no WARN/ERROR findings. Authenticated browser testing confirmed private file retrieval byte-for-byte, server rejection of completion without evidence, acceptance after configured controls, degraded readiness after evidence rejection, retained review/decision history, and saved records after reload. The 10 navigation destinations were exercised. First entry asks the user to choose or configure a site; no test site is automatically selected.
+Frontend import validation has automated tests. The private backend has separate PostgreSQL tests for access isolation, site/task instantiation, verification, atomic imports, dependency cycles, degraded acceptance and immutable history. Hosted anonymous REST requests are rejected, every public table has RLS, private file storage is configured, and no new database security warnings were introduced. The hosted Auth advisor reports compromised-password protection disabled; this client uses email-link sign-in. Authenticated browser testing confirmed private file retrieval byte-for-byte, server rejection of completion without evidence, acceptance after configured controls, degraded readiness after evidence rejection, retained review/decision history, and saved records after reload. The 10 navigation destinations were exercised. First entry asks the user to choose or configure a site; no test site is automatically selected.
