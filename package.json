@@ -1,0 +1,18 @@
+{
+  "name": "structive-site-activation-client",
+  "version": "0.2.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node build.mjs",
+    "test": "node tests/imports.test.mjs"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "2.117.2",
+    "papaparse": "5.7.0",
+    "read-excel-file": "9.3.10"
+  },
+  "devDependencies": {
+    "esbuild": "0.28.2"
+  }
+}
