@@ -1,3 +1,4 @@
+import {createCommercial} from "./commercial.js";
 import { createOwnership } from "./ownership.js";
 import { createHelp } from "./help.js";
 import { productBanner } from "./branding.js";
@@ -6,18 +7,20 @@ import { createOverview } from "./overview.js";
 import { createClient } from "@supabase/supabase-js";
 import { fields, labels, parseFile, mapRows, toCSV } from "./records.js";
 const $ = (s) => document.querySelector(s), esc = (v) => String(v ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
-const nav = [["setup", "Overview", "Workspace"], ["equipment", "Master Equipment", ""], ["schedule", "Source Cx Schedule", ""], ["milestones", "Milestones", ""], ["team", "Scopes & People", "Coordinate"], ["tasks", "Task Register", ""], ["capabilities", "Capabilities & Authority", ""], ["evidence", "Evidence & Sources", ""], ["soc", "SOC 2 Assurance", "Assure"], ["assurance", "Commissioning QA", ""], ["reviews", "Verification Queue", ""], ["readiness", "Readiness & Decisions", ""], ["history", "Change History", ""]];
+const nav = [["account", "Organization", "Account"], ["setup", "Overview", "Workspace"], ["equipment", "Master Equipment", ""], ["schedule", "Source Cx Schedule", ""], ["milestones", "Milestones", ""], ["team", "Scopes & People", "Coordinate"], ["tasks", "Task Register", ""], ["capabilities", "Capabilities & Authority", ""], ["evidence", "Evidence & Sources", ""], ["soc", "SOC 2 Assurance", "Assure"], ["assurance", "Commissioning QA", ""], ["reviews", "Verification Queue", ""], ["readiness", "Readiness & Decisions", ""], ["history", "Change History", ""]];
 const statusValues = ["Not Started", "In Progress", "Submitted", "Blocked", "Complete"];
 const levels = ["V1 \xB7 Existence", "V2 \xB7 Administrative", "V3 \xB7 Technical", "V4 \xB7 Field", "V5 \xB7 Performance", "V6 \xB7 Operational"];
 const milestoneNames = { L1: "L1", L2: "L2", L3: "L3", L4: "L4", L5: "L5", G0: "Activation Basis", G1: "System Readiness", G2: "Operations MVP", G3: "Integrated Operational Readiness", G4: "Building Handoff", G5: "Stabilization Exit", G6: "Steady State" };
 let db, session, workspaces = [], members = [], people = [], catalog = [], sites = [], campuses = [], site = null, data = {}, route = "setup", taskFilters = { search: "", vertical: "", status: "", milestone: "" }, page = 0, renderId = 0, loadedAt = "", busy = false;
-const role = () => members.find((m) => m.workspace_id === site?.workspace_id)?.role || members[0]?.role;
+let commerce={vendor:false,accounts:[]},workspaceId=null,customerMode=false;
+const vendorMode=()=>commerce.vendor&&!customerMode;
+const role = () => commerce.accounts.find(a=>a.workspace_id===workspaceId)?.role || members.find(m=>m.workspace_id===workspaceId)?.role;
 const manage = () => ["admin", "manager"].includes(role());
 const verify = () => ["admin", "manager", "verifier"].includes(role());
 const edit = () => ["admin", "manager", "verifier", "contributor"].includes(role());
 const scoped = () => role() === "scoped";
-const visibleNav = () => nav.filter(([id]) => !scoped() || ['setup','team','tasks','evidence','soc'].includes(id));
-const roleLabel = () => scoped() ? (ownership.access().owner ? 'Scope owner' : 'Executor') : ({admin:'Program administrator',manager:'Program owner',verifier:'Verifier',contributor:'Contributor',viewer:'Viewer'}[role()] || 'No workspace access');
+const visibleNav = () => vendorMode() ? [["vendor","Customers & licenses","Platform"]] : nav.filter(([id]) => !scoped() || ['account','setup','team','tasks','evidence','soc'].includes(id));
+const roleLabel = () => scoped() ? (ownership.access().owner ? 'Scope owner' : 'Executor') : ({admin:'Customer administrator',manager:'Program owner',verifier:'Verifier',contributor:'Contributor',viewer:'Viewer'}[role()] || 'No workspace access');
 const opt = (v, label, selected) => `<option value="${esc(v)}" ${String(v) === String(selected) ? "selected" : ""}>${esc(label)}</option>`;
 const options = (rows, selected, label = "name", empty = "Select\u2026") => opt("", empty, selected) + rows.map((r) => opt(r.id, typeof label === "function" ? label(r) : r[label], selected)).join("");
 const input = (name, label, value = "", type = "text", extra = "") => `<label>${esc(label)}<input name="${name}" type="${type}" value="${esc(value)}" ${extra}></label>`;
@@ -64,12 +67,21 @@ async function all(tableName, column, value, order = "id") {
 }
 async function loadWorkspace() {
   await rpc("bootstrap_membership");
-  [workspaces, members, campuses, sites, people, catalog] = await Promise.all(["workspaces", "workspace_members", "campuses", "sites", "workspace_people", "vertical_catalog"].map((t) => all(t, null, null, t === "workspace_members" ? "workspace_id" : t === "vertical_catalog" ? "code" : "id")));
+  commerce=await rpc('commercial_context');
+  if(vendorMode()){
+    site=null;data={};workspaces=[];members=[];sites=[];campuses=[];people=[];
+    await commercial.loadVendor();route='vendor';history.replaceState(null,'','#vendor');return;
+  }
+  const savedWorkspace=workspaceId||sessionStorage.getItem('threshold-workspace');
+  workspaceId=commerce.accounts.find(a=>a.workspace_id===savedWorkspace)?.workspace_id||commerce.accounts[0]?.workspace_id||null;
+  if(workspaceId)sessionStorage.setItem('threshold-workspace',workspaceId);
+  [workspaces,members,campuses,sites,people,catalog]=await Promise.all(["workspaces","workspace_members","campuses","sites","workspace_people","vertical_catalog"].map(t=>all(t,null,null,t==='workspace_members'?'workspace_id':t==='vertical_catalog'?'code':'id')));
+  workspaces=workspaces.filter(w=>w.id===workspaceId);campuses=campuses.filter(c=>c.workspace_id===workspaceId);sites=sites.filter(s=>s.workspace_id===workspaceId);people=people.filter(p=>p.workspace_id===workspaceId);
   catalog.sort((a,b)=>a.sort_order-b.sort_order);
-  const saved = sessionStorage.getItem("structive-site");
-  site = sites.find((s) => s.id === (site?.id || saved)) || (members.length && members.every(m=>m.role==='scoped') ? sites[0] : null) || null;
-  if (site) await loadSite();
-  else data = {};
+  const saved=sessionStorage.getItem('structive-site');
+  site=sites.find(s=>s.id===(site?.id||saved))||(scoped()?sites[0]:null)||null;
+  if(site)await loadSite();else data={tasks:[],site_verticals:[],vertical_team:[],milestones:[],requirement_milestones:[]};
+  if(!site&&(!sites.length||!commerce.accounts.find(a=>a.workspace_id===workspaceId)?.active))route='account';
 }
 async function loadSite() {
   const loadingSiteId = site.id;
@@ -84,8 +96,13 @@ async function loadSite() {
   sessionStorage.setItem("structive-site", site.id);
 }
 function shell() {
+  if(vendorMode()){
+    $('#app').innerHTML=`<div class="app vendor-app"><aside><div class="brand"><span class="brand-icon">${brandMark}</span><div><b>Threshold</b><small>STRUCTIVE PLATFORM</small></div></div><nav aria-label="Vendor navigation"><div class="group">Platform</div><button type="button" data-action="vendor-home" aria-current="page">Customers & licenses</button>${commerce.accounts.length?'<button type="button" data-action="vendor-preview">Internal workspace</button>':''}</nav><div class="aside-note"><span class="rail-signature">STRUCTIVE</span><span>PLATFORM OWNER</span></div></aside><main>${productBanner()}<header><div><strong>Vendor console</strong><small class="vendor-subtitle">Customer accounts and commercial access</small></div><div class="row"><small>${esc(session?.user.email||'')}</small>${button('Refresh','refresh')}${button('Sign out','signout')}</div></header><section class="content" id="content" tabindex="-1">${commercial.vendorView()}</section></main></div>`;
+    guide.setContext('vendor');guide.mount();return;
+  }
+
   if(!visibleNav().some(([id])=>id===route)){route="setup";history.replaceState(null,"","#setup");}
-  $("#app").innerHTML = `<div class="app"><aside><div class="brand"><span class="brand-icon">${brandMark}</span><div><b>${productName}</b><small>POWERED BY STRUCTIVE</small></div></div><nav aria-label="Main navigation">${visibleNav().map(([id, label, group]) => `${group ? `<div class="group">${group}</div>` : ""}<button type="button" data-route="${id}" ${route === id ? 'aria-current="page"' : ""}>${navIcon(id)}<span>${scoped() && id==='setup' ? (ownership.access().owner ? 'My scope' : 'My work') : label}</span></button>`).join("")}</nav><div class="aside-note"><span class="rail-signature">STRUCTIVE</span><span>OWNER ASSURANCE<br>SITE ACTIVATION / OPERATIONS</span></div></aside><main>${productBanner()}<header><label>Campus / site<select id="site-select" aria-label="Select site">${opt("", sites.length ? "Set up or select a site" : "No site configured", site?.id || "")}${sites.map((s) => opt(s.id, `${campuses.find((c) => c.id === s.campus_id)?.name || ""} / ${s.code} \xB7 ${s.name}`, site?.id)).join("")}</select></label><div class="row"><small>${esc(roleLabel())}<br>${esc(session?.user.email || "")}</small>${button("Refresh", "refresh")}${button("Sign out", "signout")}</div></header><section class="content" id="content" tabindex="-1"></section></main></div>`;
+  $("#app").innerHTML = `<div class="app"><aside><div class="brand"><span class="brand-icon">${brandMark}</span><div><b>${productName}</b><small>POWERED BY STRUCTIVE</small></div></div><nav aria-label="Main navigation">${visibleNav().map(([id, label, group]) => `${group ? `<div class="group">${group}</div>` : ""}<button type="button" data-route="${id}" ${route === id ? 'aria-current="page"' : ""}>${navIcon(id)}<span>${scoped() && id==='setup' ? (ownership.access().owner ? 'My scope' : 'My work') : label}</span></button>`).join("")}</nav><div class="aside-note"><span class="rail-signature">STRUCTIVE</span><span>OWNER ASSURANCE<br>SITE ACTIVATION / OPERATIONS</span></div></aside><main>${productBanner()}<header><label>Organization<select id="workspace-select" aria-label="Select organization">${commerce.accounts.map(a=>opt(a.workspace_id,a.name,workspaceId)).join("")}</select></label><label>Campus / site<select id="site-select" aria-label="Select site">${opt("", sites.length ? "Set up or select a site" : "No site configured", site?.id || "")}${sites.map((s) => opt(s.id, `${campuses.find((c) => c.id === s.campus_id)?.name || ""} / ${s.code} \xB7 ${s.name}`, site?.id)).join("")}</select></label><div class="row"><small>${esc(roleLabel())}<br>${esc(session?.user.email || "")}</small>${commerce.vendor?button("Vendor console","vendor-home"):""}${button("Refresh", "refresh")}${button("Sign out", "signout")}</div></header><section class="content" id="content" tabindex="-1"></section></main></div>`;
   guide.mount();
   render();
 }
@@ -97,14 +114,20 @@ function navigate(value) {
   } else location.hash = next;
 }
 async function render() {
+  if(vendorMode()){$('#content').innerHTML=commercial.vendorView();return;}
+
   guide.hideTip();
   if(!visibleNav().some(([id])=>id===route))route="setup";
   guide.setContext(scoped() && route==='setup' ? 'my-work' : route);
   const generation = ++renderId;
+  if(route==='account'||(commercial.account()&&!commercial.account().active)){
+    guide.setContext('account');$('#content').innerHTML=commercial.accountView();return;
+  }
   if (!workspaces.length) {
     $("#content").innerHTML = heading("Workspace access required", "You are signed in, but this account has not been assigned to a Structive workspace.") + `<div class="card"><p>Use the email address authorized for this workspace. Signing in does not automatically grant access to site records.</p>${button("Sign out", "signout")}</div>`;
     return;
   }
+  if(!site&&route==='team'&&manage()){$('#content').innerHTML=ownership.teamView();return;}
   if (!site && !manage()) {
     $("#content").innerHTML=heading("Your workspace is ready for an assignment", "Ask your program administrator to assign you to a vertical and link your tasks. Your individual sign-in is active.");
     return;
@@ -227,7 +250,7 @@ async function save(formEl, fn, message = "Saved to the site record.") {
   }
 }
 function newSite() {
-  modal("Set up a site", form("site-create", `<div class="callout">This creates a blank execution record from the 832 source tasks across 13 verticals. Owners, due dates, equipment links and evidence must be set for this site.</div><div class="grid two">${select("workspace_id", "Workspace", options(workspaces, workspaces[0]?.id), "required")}${select("campus_existing", "Existing campus (optional)", options(campuses, "", "name", "Create a new campus"))}${input("campus_code", "Campus code", "", "text", 'required maxlength="30"')}${input("campus_name", "Campus name", "", "text", "required")}${input("site_code", "Site code", "", "text", 'required maxlength="30"')}${input("site_name", "Site name", "", "text", "required")}${input("building_name", "Building / phase", "", "text", "required")}${select("model", "Operating model", ["Self-Perform", "3PDC", "Colocation", "Hybrid"].map((m) => opt(m, m, "Self-Perform")).join(""))}${input("authority_name", "Owner acceptance authority", "", "text", "required")}</div><h3>Milestone target dates</h3><p class="muted">Leave a date blank if it has not been established.</p><div class="grid three">${Object.entries(milestoneNames).map(([code, name]) => input("date_" + code, code + " \xB7 " + name, "", "date")).join("")}</div>`, "Create site & execution register"));
+  modal("Set up a site", form("site-create", `<div class="callout">This creates a blank execution record from the 832 source tasks across 13 verticals. Owners, due dates, equipment links and evidence must be set for this site.</div><div class="grid two">${select("workspace_id", "Workspace", options(workspaces, workspaceId), "required")}${select("campus_existing", "Existing campus (optional)", options(campuses, "", "name", "Create a new campus"))}${input("campus_code", "Campus code", "", "text", 'required maxlength="30"')}${input("campus_name", "Campus name", "", "text", "required")}${input("site_code", "Site code", "", "text", 'required maxlength="30"')}${input("site_name", "Site name", "", "text", "required")}${input("building_name", "Building / phase", "", "text", "required")}${select("model", "Operating model", ["Self-Perform", "3PDC", "Colocation", "Hybrid"].map((m) => opt(m, m, "Self-Perform")).join(""))}${input("authority_name", "Owner acceptance authority", "", "text", "required")}</div><h3>Milestone target dates</h3><p class="muted">Leave a date blank if it has not been established.</p><div class="grid three">${Object.entries(milestoneNames).map(([code, name]) => input("date_" + code, code + " \xB7 " + name, "", "date")).join("")}</div>`, "Create site & execution register"));
   $("#site-create [name=campus_existing]").onchange = (e) => {
     const c = campuses.find((c2) => c2.id === e.target.value);
     for (const k of ["code", "name"]) $("#site-create [name=campus_" + k + "]").value = c?.[k] || "";
@@ -440,6 +463,11 @@ function importModal(kind) {
   };
 }
 async function action(name, id) {
+  if(name==='vendor-home'){customerMode=false;await loadWorkspace();shell();return;}
+  if(name==='vendor-preview'){customerMode=true;workspaceId=commerce.accounts.find(a=>a.billing_source==='internal')?.workspace_id||commerce.accounts[0]?.workspace_id;route='account';history.replaceState(null,'','#account');await loadWorkspace();shell();return;}
+  if(name.startsWith('commercial-')){guide.setContext(vendorMode()?'vendor':'account');return commercial.handle(name,id);}
+  if(name==='public-plans'){return showPurchaseOptions();}
+
   const helpContext = { "new-site": "setup-1", "edit-site": "setup-1", "task": "tasks", "new-task": "tasks", "requirement": "tasks", "asset": "equipment", "new-asset": "equipment", "milestone": "milestones", "capability": "capabilities", "add-evidence": "evidence", "open-evidence": "evidence", "review": "reviews", "accept": "readiness", "withdraw": "readiness", "decision": "history", "audit": "history", "import": id === "assets" ? "equipment" : "schedule" };
   if (helpContext[name]) guide.setContext(helpContext[name]);
   if(['person-new','person-edit','scope-edit','soc-edit'].includes(name)){guide.setContext(name==='soc-edit'?'soc':'team');return ownership.handle(name,id);}
@@ -531,6 +559,11 @@ document.addEventListener("submit", (e) => {
   }
 });
 document.addEventListener("change", async (e) => {
+  if(e.target.id==='workspace-select'){
+    workspaceId=e.target.value;site=null;route='account';history.replaceState(null,'','#account');
+    try{await loadWorkspace();shell()}catch(err){notice(err.message,true)}return;
+  }
+
   if (e.target.id === "site-select") {
     e.target.disabled = true;
     try {
@@ -568,9 +601,13 @@ window.addEventListener("hashchange", () => {
     render();
   }
 });
+async function showPurchaseOptions(){
+  const plans=await rpc('commercial_catalog');
+  modal('Get Threshold',`<p class="muted">Each subscription includes an isolated organization, customer administration, coded vertical ownership and individual workspaces.</p><div class="commercial-plans">${plans.map(p=>`<article class="commercial-plan"><h3>${esc(p.name)}</h3><p>${p.max_users} users · ${p.max_sites} sites</p><a class="button" href="${esc(p.checkout_url)}" rel="noopener noreferrer">View price & subscribe →</a></article>`).join('')||'<p>Online purchase options are being configured. Contact Structive for a customer license.</p>'}</div><p class="help">After purchase, your administrator account is provisioned from confirmed payment. Sign in using the purchase email.</p>${button('Close','close')}`);
+}
 function authView(message = "") {
   guide.hide();
-  $("#app").innerHTML = `<main class="auth">${productBanner()}<div class="card"><h1>Open your workspace</h1><p class="sub">From commissioning assurance to steady operations. One connected readiness workspace.</p>${message ? `<div class="callout">${esc(message)}</div>` : ""}<form id="signin">${input("email", "Authorized workspace email", "", "email", 'required autocomplete="email"')}<button type="submit">Email a sign-in link</button></form><p class="help">Only authorized workspace members can access site data. Check your email to finish signing in.</p></div></main>`;
+  $("#app").innerHTML = `<main class="auth">${productBanner()}<div class="card"><h1>Open your workspace</h1><p class="sub">From commissioning assurance to steady operations. One connected readiness workspace.</p>${message ? `<div class="callout">${esc(message)}</div>` : ""}<form id="signin">${input("email", "Authorized workspace email", "", "email", 'required autocomplete="email"')}<button type="submit">Email a sign-in link</button></form><p class="help">Use the email associated with your purchase or customer invitation. Your organization and role determine your workspace.</p>${button("Purchase Threshold","public-plans","","link")}</div></main>`;
   $("#signin").onsubmit = async (e) => {
     e.preventDefault();
     const b = e.target.querySelector("button");
@@ -617,6 +654,7 @@ async function start() {
     });
     if (!session) {
       authView();
+      if(location.hash==="#plans")await showPurchaseOptions();
       return;
     }
     route = nav.some((n) => n[0] === location.hash.slice(1)) ? location.hash.slice(1) : "setup";
@@ -626,7 +664,9 @@ async function start() {
     $("#app").innerHTML = `<main class="auth"><h1>Workspace unavailable</h1><div class="callout error">${esc(err.message)}</div><p>Reload to retry. Existing site records are retained on the server.</p></main>`;
   }
 }
-const ownership = createOwnership({state:()=>({site,data,people,catalog,userId:session?.user.id,role:role(),manage:manage()}),ui:{esc,heading,button,table,badge,input,area,select,check,opt,options,modal,form,save,read},rpc,notice});
+const commercial=createCommercial({state:()=>({commerce,workspaceId}),ui:{esc,button,badge,table,heading,input,select,check,opt,options,modal,form,read,save},rpc,notice,navigate,
+ invoke:async body=>unwrap(db.functions.invoke('threshold-commerce',{body})),reload:async()=>{await loadWorkspace();shell()}});
+const ownership = createOwnership({state:()=>({site,workspaceId,data,people,catalog,userId:session?.user.id,role:role(),manage:manage()}),ui:{esc,heading,button,table,badge,input,area,select,check,opt,options,modal,form,save,read},rpc,notice});
 const guide = createHelp({ state: () => ({ site, data, allowedRoutes:visibleNav().map(([id])=>id) }), esc });
 const dashboard = createOverview({ state: () => ({ site, data, campuses, manage: manage(), verify: verify() }), ui: { esc, input, area, select, check, opt, options, button, table, badge, heading, modal, form, save, read, levels }, onContext: (key) => guide.setContext(key), hideTip: () => guide.hideTip(), rpc, reload: async () => {
   await loadWorkspace();

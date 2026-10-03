@@ -1,3 +1,4 @@
+import {customerRoles} from "./commercial.js";
 export function scopeAccess({site,data,people,userId,role}) {
  const person=people.find(p=>p.workspace_id===site?.workspace_id&&p.user_id===userId&&p.active);
  const owned=(data.site_verticals||[]).filter(v=>v.owner_person_id===person?.id&&person);
@@ -40,13 +41,13 @@ export function createOwnership({state,ui,rpc,notice}) {
   return `<article class="scope-card"><div class="row between"><span class="scope-code">${esc(v.code)}</span>${state().manage?button('Assign scope','scope-edit',v.code,'link'):''}</div><h2>${esc(v.name)}</h2><p class="scope-owner">Scope owner / sponsor<strong>${esc(personName(scope?.owner_person_id))}</strong></p><div class="scope-counts"><span><b>${s.total}</b> tasks</span><span><b>${s.unassigned}</b> need an assignee</span><span><b>${s.blocked}</b> blocked</span></div></article>`;
  }
  function teamView() {
-  const {site,data,people,catalog,manage}=state(),a=access();
+  const {site,workspaceId,data,people,catalog,manage}=state(),a=access();
   const visible=catalog.filter(v=>(data.site_verticals||[]).some(s=>s.vertical_code===v.code));
-  const roster=people.filter(p=>p.workspace_id===site.workspace_id);
+  const roster=people.filter(p=>p.workspace_id===(site?.workspace_id||workspaceId));
   return heading(manage?'Scopes & People':a.owner?'My scope & team':'My scope','Each vertical has one accountable scope owner. Task owners carry out the individual work.')+
-   `<div class="row between"><p class="muted">${visible.length} coded verticals · Scope ownership and task execution are assigned separately.</p>${manage?button('Authorize a person','person-new','',''):''}</div>`+
+   `<div class="row between"><p class="muted">${site?visible.length+' coded verticals':'Create a site to assign its coded verticals'} · Scope ownership and task execution are assigned separately.</p>${manage?button('Authorize a person','person-new','',''):''}</div>`+
    `<div class="scope-grid">${visible.map(scopeCard).join('')}</div><section class="card"><div class="row between"><h2>${manage?'Authorized people':'People in your scope'}</h2><span class="muted">Individual email sign-in</span></div>`+
-   table(['Person','Login email','Access state',''],roster.map(p=>`<tr><td>${esc(p.display_name)}</td><td>${esc(p.email)}</td><td>${badge(!p.active?'Suspended':p.user_id?'Login linked':'Awaiting first sign-in')}</td><td>${manage?button('Edit','person-edit',p.id,'link'):''}</td></tr>`))+
+   table(['Person','Login email','Customer role','Access state',''],roster.map(p=>`<tr><td>${esc(p.display_name)}</td><td>${esc(p.email)}</td><td>${esc(customerRoles.find(x=>x[0]===p.access_role)?.[1]||p.access_role||"Team member")}</td><td>${badge(!p.active?'Suspended':p.user_id?'Login linked':'Awaiting first sign-in')}</td><td>${manage?button('Edit','person-edit',p.id,'link'):''}</td></tr>`))+
    `<p class="help">An authorized person uses their own email to sign in. Access follows their scope and task assignments. Scope owners can assign tasks to themselves or their team.</p></section>`;
  }
  function dashboard() {
@@ -68,9 +69,9 @@ export function createOwnership({state,ui,rpc,notice}) {
  }
  function personModal(id) {
   if(!state().manage)throw Error('Workspace administrator required.');
-  const {people,site}=state(),p=people.find(x=>x.id===id)||{};
-  modal(p.id?'Update authorized person':'Authorize a person',form('person-edit',`<p class="muted">Authorize a unique email, then assign the person to a vertical. Scope ownership grants the owner view; individual task assignments drive the executor view.</p><div class="grid two">${input('display_name','Name',p.display_name||'','text','required maxlength="150"')}${input('email','Login email',p.email||'','email',`required autocomplete="off" ${p.id?'readonly':''}`)}</div>${p.id?check('active','Access is active',p.active):''}<p class="help">This saves authorization. The person requests their own sign-in link from the Threshold login page.</p>`,p.id?'Save person':'Authorize person'));
-  document.querySelector('#person-edit').onsubmit=e=>{e.preventDefault();const v=read(e.target);save(e.target,()=>rpc('save_workspace_person',{workspace_id:site.workspace_id,person_id:p.id||null,display_name:v.display_name,email:v.email,active:p.id?!!v.active:true}),'Person saved. Assign their scope and share the Threshold sign-in page.');};
+  const {people,site,workspaceId}=state(),p=people.find(x=>x.id===id)||{};
+  modal(p.id?'Update authorized person':'Authorize a person',form('person-edit',`<p class="muted">Authorize a unique email, then assign the person to a vertical. Scope ownership grants the owner view; individual task assignments drive the executor view.</p><div class="grid two">${input('display_name','Name',p.display_name||'','text','required maxlength="150"')}${input('email','Login email',p.email||'','email',`required autocomplete="off" ${p.id?'readonly':''}`)}</div>${state().role==='admin'?select('access_role','Customer role',customerRoles.map(([value,label])=>opt(value,label,p.access_role||'scoped')).join('')):''}${p.id?check('active','Access is active',p.active):''}<p class="help">This saves authorization. The person requests their own sign-in link from the Threshold login page.</p>`,p.id?'Save person':'Authorize person'));
+  document.querySelector('#person-edit').onsubmit=e=>{e.preventDefault();const v=read(e.target);save(e.target,()=>rpc('save_customer_person',{workspace_id:site?.workspace_id||workspaceId,person_id:p.id||null,display_name:v.display_name,email:v.email,active:p.id?!!v.active:true,access_role:v.access_role||p.access_role||'scoped'}),'Person saved. Assign their scope and share the Threshold sign-in page.');};
  }
  function scopeModal(code) {
   if(!state().manage)throw Error('Site administrator required.');

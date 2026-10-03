@@ -22,6 +22,29 @@ Threshold is the current product name, powered by Structive. The public route an
 
 Space Grotesk is by Florian Karsten and its contributors, distributed under the SIL Open Font License. Source: https://github.com/floriankarsten/space-grotesk . The bundled font license is in `assets/fonts/OFL-SpaceGrotesk.txt`.
 
+## Commercial account layer
+
+The Structive platform owner lands in a dedicated vendor console. Customer accounts,
+plans, user/site limits and setup-link delivery are administered separately from the
+operational dashboard. The platform role does not automatically grant customer
+operational membership. The existing verification workspace remains internal.
+
+Each customer has its own administrator, users and sites. Customer administrators
+can authorize other administrators, program owners, verifiers, scoped team members
+and viewers. The last active administrator is protected. Active and pending people
+both consume seats; site and user limits are enforced in the database.
+
+The private commercial backend includes a Stripe signature-verified payment receiver,
+idempotent customer provisioning, current subscription synchronization, setup-email
+delivery tracking and a customer billing-portal endpoint. Public purchase options are
+returned only for published plans linked to a Stripe price and payment link.
+
+Live sales require Stripe credentials and webhook configuration, approved pricing,
+and working authentication email delivery. No paid offers were invented or published
+as part of this release. Draft plans and manual contract accounts can be managed in
+the vendor console. Private migration and Edge Function source remain outside this
+public repository.
+
 ## Scope ownership and individual workspaces
 
 - Thirteen canonical scope codes: GOV, OPS, MNT, REL, CTL, TRN, EHS, SEC, LOG, VEN, BCM, DOC and ITOT.
