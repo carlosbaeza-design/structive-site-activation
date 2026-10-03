@@ -1,6 +1,10 @@
-# SteadyGate · Powered by Structive
+# Threshold · Powered by Structive
 
-Owner assurance and readiness workspace for data center activation. Commissioning is executed by the delivery team; SteadyGate supports its QA/QC, evidence review and owner acceptance.
+Owner assurance and readiness workspace for data center activation. Commissioning is executed by the delivery team; Threshold supports its QA/QC, evidence review and owner acceptance.
+
+## Branding iteration
+
+Threshold is the current working product name, endorsed as Powered by Structive. The shared title banner uses an animated ice-blue-to-amber wordmark, illuminated geometric frames, and a horizon graphic. Motion can be paused and automatically respects reduced-motion preferences. The banner appears in the workspace and sign-in view.
 
 ## Status
 
