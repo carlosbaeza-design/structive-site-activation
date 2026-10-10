@@ -7,14 +7,14 @@ export const fields={
 };
 export const labels={code:'Equipment tag',name:'Name',system:'System',equipment_type:'Equipment type',location:'Location',criticality:'Criticality',manufacturer:'Manufacturer',model:'Model',external_id:'Activity ID',start_date:'Start date',finish_date:'Finish date',level:'Cx level',asset_code:'Equipment tag',status:'Status',predecessor_codes:'Predecessor IDs',milestone_code:'Milestone code'};
 export async function parseFile(file){
- if(file.size>10*1024*1024)throw Error('For structured import, use a CSV or XLSX file under 10 MB. Larger source documents can be stored as evidence.');
+ if(file.size>10*1024*1024)throw Error('For structured import, use a CSV or XLSX file under 10 MB. Keep larger source documents in your repository and add a reference link.');
  let rows;
  if(/\.xlsx$/i.test(file.name)) rows=await readXlsxFile(file);
  else if(/\.csv$/i.test(file.name)){
   const parsed=Papa.parse(await file.text(),{skipEmptyLines:'greedy'});
   if(parsed.errors.length)throw Error('CSV could not be read: '+parsed.errors[0].message);
   rows=parsed.data;
- }else throw Error('Choose a CSV or XLSX export. Upload native schedule files and scripts in Evidence & Sources.');
+ }else throw Error('Choose a CSV or XLSX export. Link native schedule files and scripts in Document Directory.');
  rows=rows.filter(r=>r.some(v=>v!==null&&v!==''));
  if(rows.length<2||rows.length>2001)throw Error('Use a header row and between 1 and 2,000 data rows. XLSX imports use the first sheet.');
  const headers=rows[0].map((v,i)=>String(v??'').trim()||'Column '+(i+1));
@@ -44,3 +44,4 @@ export function mapRows(kind,parsed,mapping,milestoneCodes){
  });
 }
 export function toCSV(records){return Papa.unparse(records,{escapeFormulae:true});}
+

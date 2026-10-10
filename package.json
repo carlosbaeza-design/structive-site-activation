@@ -1,6 +1,6 @@
 {
   "name": "structive-site-activation-client",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "private": true,
   "type": "module",
   "scripts": {
@@ -14,6 +14,7 @@
   },
   "devDependencies": {
     "@electric-sql/pglite": "0.5.8",
-    "esbuild": "0.28.2"
+    "esbuild": "0.28.2",
+    "jsdom": "26.1.0"
   }
 }
