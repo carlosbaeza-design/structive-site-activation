@@ -1,3 +1,4 @@
+import {installFieldHelp} from './field-help.js';
 import {createProgram} from "./program.js";
 import {createCommercial} from "./commercial.js";
 import { createOwnership } from "./ownership.js";
@@ -676,5 +677,6 @@ const dashboard = createOverview({ state: () => ({ site, data, campuses, manage:
   await loadWorkspace();
   shell();
 }, navigate, notice });
+installFieldHelp(document);
 start();
 

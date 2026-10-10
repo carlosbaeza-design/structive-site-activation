@@ -14,6 +14,10 @@ Default milestones include Threshold Go-Live, L1–L5, Operations MVP, Building 
 
 CSV and first-sheet XLSX imports retain only the equipment and schedule records needed by the portal, plus a reference to the original document. Scripts and other documents remain external. Individual criteria, contributions and inspections support external links, opening in new tabs. The Document Directory automatically organizes references under building / pillar / bucket folders with optional custom subfolders. ZIP folder-tree export and a clickable HTML index require no repository integration. Browsers supporting directory selection can create the template locally.
 
+## Input help
+
+Every visible input has a short field explanation. Hover over the field or its question-mark button, focus it with the keyboard, or tap the button on a phone. Escape or a second tap closes the tip. Help also covers dynamically added criteria, links, assignments and import mappings. Acceptance authority means the person the customer allows to approve a milestone or building handoff; a text reference does not grant portal permissions.
+
 ## Interactive trial
 
 Open https://carlosbaeza-design.github.io/structive-site-activation/#try to explore the wizard without a sign-in. Trial changes persist only in that browser session and never affect customer records. The trial uses four labeled roles and is not a permissions demonstration. Leave the trial to access licensed customer workspaces.

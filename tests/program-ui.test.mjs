@@ -4,8 +4,9 @@ test('trial wizard configures a gated criterion, reuses assignments and links di
  for(const key of ['window','document','location','history','sessionStorage','localStorage','FormData','HTMLElement','Element','HTMLDialogElement'])globalThis[key]=dom.window[key];
  dom.window.HTMLDialogElement.prototype.showModal=function(){this.open=true;};dom.window.HTMLDialogElement.prototype.close=function(){this.open=false;};dom.window.HTMLElement.prototype.scrollIntoView=function(){};
  await import('../src/app.js');const $=s=>document.querySelector(s),tick=()=>new Promise(r=>setTimeout(r,30));await tick();
- async function click(selector){const el=$(selector);assert(el,'Missing '+selector);el.click();await tick();}
- async function submit(selector){const f=$(selector);assert(f);f.dispatchEvent(new dom.window.Event('submit',{bubbles:true,cancelable:true}));await tick();}
+ function assertHints(){for(const control of document.querySelectorAll('input,select,textarea')){assert(control.getAttribute('aria-describedby'),'Missing hint for '+(control.name||control.id));assert.notEqual(control.dataset.fieldHelpKind,'fallback','Generic hint for '+control.name);}}assertHints();
+ async function click(selector){const el=$(selector);assert(el,'Missing '+selector);el.click();await tick();assertHints();}
+ async function submit(selector){const f=$(selector);assert(f);f.dispatchEvent(new dom.window.Event('submit',{bubbles:true,cancelable:true}));await tick();assertHints();}
  await click('[data-action=program-step][data-id="1"]');const p=$('[data-program-pillar=OPS]');p.checked=true;p.dispatchEvent(new dom.window.Event('change',{bubbles:true}));await tick();
  await click('[data-action=program-pillar-settings][data-id=OPS]');$('#program-pillar-settings [name=owner]').selectedIndex=2;await submit('#program-pillar-settings');
  await click('[data-action=program-step][data-id="2"]');await click('[data-action=program-defaults]');const d=$('#program-defaults');d.elements.owner.selectedIndex=3;d.elements.reviewer.selectedIndex=4;d.elements.provider.value='Third-party operator';d.elements.mile_MVP.checked=true;await submit('#program-defaults');
@@ -16,6 +17,10 @@ test('trial wizard configures a gated criterion, reuses assignments and links di
  $('#program-result [name=actual]').value='5';await submit('#program-result');assert.equal($('#dialog').open,false);
  await click('[data-action=program-new-criterion]');await click('[data-action=program-same-previous]');assert.equal($('#program-criterion [name=provider]').value,'Third-party operator');await click('[data-action=close]');
  await click('[data-route=program-directory]');const link=$('.document-tree a');assert.equal(link.getAttribute('target'),'_blank');assert.match(link.href,/roster/);assert.match($('.document-tree').textContent,/Operations/);
+ await click('[data-route=program-wizard]');await click('[data-action=program-step][data-id="3"]');await click('[data-action=program-sampling]');assertHints();await click('[data-action=close]');
+ await click('[data-action=program-step][data-id="4"]');await click('[data-action=program-inputs-config]');assertHints();await click('[data-action=close]');await click('[data-action=program-import][data-id=assets]');assertHints();await click('[data-action=close]');
+ await click('[data-action=program-step][data-id="5"]');await click('[data-action=program-new-milestone]');assertHints();await click('[data-action=close]');
+ await click('[data-route=program-directory]');await click('[data-action=program-new-folder]');assertHints();await click('[data-action=close]');
  await click('[data-route=setup]');assert.match($('#content').textContent,/100%/);assert.match($('#content').textContent,/Threshold owner/);
  dom.window.close();
 });
