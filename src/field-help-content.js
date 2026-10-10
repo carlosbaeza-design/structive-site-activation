@@ -2,6 +2,8 @@
 const authority = 'The person your company allows to approve a milestone or building handoff.';
 const authorityReference = 'Name the person or role allowed to approve readiness. Add the policy or written delegation that gives them that permission, if you have one. This note does not grant portal permissions.';
 export const labelHelp = {
+ 'Pillar MVP statement': 'Describe the least this pillar must deliver to begin operations. Mark the individual criteria that prove this minimum. The statement is shown on the dashboard.',
+ 'Required for pillar MVP': 'This criterion must be verified for the pillar’s MVP badge to turn green. Its milestone gating choice stays separate.',
  'Acceptance authority': authority+' Select them here to allow them to record this milestone decision.',
  'Acceptance authority / delegation reference': authorityReference,
  'Acceptance authority / reference': authorityReference,
