@@ -22,5 +22,12 @@ test('trial wizard configures a gated criterion, reuses assignments and links di
  await click('[data-action=program-step][data-id="5"]');await click('[data-action=program-new-milestone]');assertHints();await click('[data-action=close]');
  await click('[data-route=program-directory]');await click('[data-action=program-new-folder]');assertHints();await click('[data-action=close]');
  await click('[data-route=setup]');assert.match($('#content').textContent,/100%/);assert.match($('#content').textContent,/Threshold owner/);
+ assert.equal($('#content h1').textContent,'Building Readiness');
+ assert.equal($('.acceptance-verdict').textContent,'Full Acceptance');
+ await click('[data-action=program-review-points]');await click('[data-action=program-review-point][data-id=HANDOFF]');
+ assert.equal($('.acceptance-verdict').textContent,'Assessment Incomplete');
+ assert.match($('.acceptance-scope').textContent,/Building Handoff/);
+ await click('[data-action=program-review-points]');await click('[data-action=program-review-point][data-id=""]');
+ assert.equal($('.acceptance-verdict').textContent,'Full Acceptance');
  dom.window.close();
 });
