@@ -199,6 +199,6 @@ header .field-with-help .field-help-button{background:#203c53;color:#dae6ee;bord
 @media(max-width:700px){.product-banner,.auth .product-banner{min-height:180px;padding:28px 20px}.product-wordmark,.auth .product-wordmark{font-size:clamp(38px,9vw,52px)}.product-category,.auth .product-category{font-size:11px;max-width:340px}.product-endorsement{font-size:10px}.product-banner .brand-motion-toggle{top:10px;right:10px;min-height:28px;font-size:9px}.product-banner .motion-label{display:none}.commissioning-art{inset:-20px -180px -30px 15%;opacity:.23}.banner-progress-art{inset:10px -150px -20px 10%}}
 .product-banner .product-category,.product-banner .product-endorsement,.product-banner .product-endorsement strong{letter-spacing:normal;text-transform:none}
 .auth .card h1{font-weight:var(--heading-weight);letter-spacing:normal}
-.product-wordmark .wordmark-period{font:inherit;color:#6fc48a;-webkit-text-fill-color:#6fc48a}
+.product-wordmark .wordmark-period,.brand .wordmark-period{font:inherit;color:#6fc48a;-webkit-text-fill-color:#6fc48a}
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto}.product-wordmark{animation:none!important;background-position:50% 50%}.brand-motion-toggle{display:none}}
-@media(forced-colors:active){.product-wordmark{background:none;color:CanvasText;-webkit-text-fill-color:CanvasText}.commissioning-art,.banner-progress-art{display:none}.product-wordmark .wordmark-period{color:CanvasText;-webkit-text-fill-color:CanvasText}}
+@media(forced-colors:active){.product-wordmark{background:none;color:CanvasText;-webkit-text-fill-color:CanvasText}.commissioning-art,.banner-progress-art{display:none}.product-wordmark .wordmark-period,.brand .wordmark-period{color:CanvasText;-webkit-text-fill-color:CanvasText}}
